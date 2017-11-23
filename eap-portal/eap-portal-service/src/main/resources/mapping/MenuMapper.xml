@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.eap.portal.dao.MenuMapper">
+  <select id="findByUserId" parameterType="Map" resultType="com.mk.eap.portal.dto.MenuDto">
+		SELECT DISTINCT d.id,d.code,d.name,d.appName
+		FROM eap_user a INNER JOIN eap_user_role b ON  a.id = b.userid 
+		INNER JOIN eap_menu_operation c ON b.roleid = c.roleid and c.roleid != '0'
+		INNER JOIN eap_menu d ON d.id = c.menuId 
+		WHERE a.id = #{userId};	
+  </select> 
+</mapper>

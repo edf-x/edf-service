@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.eap.component.enclosure.dao.VoucherEnclosureMapper">
+    <insert id="create" parameterType="VoucherEnclosure">
+        insert into set_voucher_enclosure (
+            orgId,
+            voucherTypeId,
+            voucherId,
+            enclosureId,
+            id,
+            code,
+            orderNumber,
+            creator,
+            createTime,
+            updateTime
+        ) values (
+            #{orgId},
+            #{voucherTypeId},
+            #{voucherId},
+            #{enclosureId},
+            #{id},
+            #{code},
+            ifnull(#{orderNumber}, (select ifnull(max(enclosure.orderNumber), 0) + 1
+                                    from set_voucher_enclosure enclosure
+                                    where enclosure.orgId = #{orgId}
+                                      and enclosure.voucherTypeId = #{voucherTypeId}
+                                      and enclosure.voucherId = #{voucherId})),
+            #{creator},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+
+    <insert id="createBatch" parameterType="java.util.List">
+        insert into set_voucher_enclosure (
+            orgId,
+            voucherTypeId,
+            voucherId,
+            enclosureId,
+            id,
+            code,
+            orderNumber,
+            creator,
+            createTime,
+            updateTime
+        ) values
+        <foreach collection="list" item="item" separator=", ">
+        (
+            #{item.orgId},
+            #{item.voucherTypeId},
+            #{item.voucherId},
+            #{item.enclosureId},
+            #{item.id},
+            #{item.code},
+            ifnull(#{item.orderNumber}, (select ifnull(max(enclosure.orderNumber), 0) + 1
+                                         from set_voucher_enclosure enclosure
+                                         where enclosure.orgId = #{item.orgId}
+                                           and enclosure.voucherTypeId = #{item.voucherTypeId}
+                                           and enclosure.voucherId = #{item.voucherId})),
+            #{item.creator},
+            #{item.createTime},
+            #{item.updateTime}
+        )
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="VoucherEnclosure">
+        update set_voucher_enclosure
+        <set>
+            <if test="voucherTypeId != null">voucherTypeId = #{voucherTypeId},</if>
+            <if test="voucherId != null">voucherId = #{voucherId},</if>
+            <if test="enclosureId != null">enclosureId = #{enclosureId},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="orderNumber != null">orderNumber = #{orderNumber},</if>
+            <if test="updateTime != null">updateTime = #{updateTime},</if>
+        </set>
+        where orgId = #{orgId} and id = #{id} and ts = #{ts}
+    </update>
+
+    <update id="updateBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" close=";" separator=";">
+            update set_voucher_enclosure
+            <set>
+                <if test="item.voucherTypeId != null">voucherTypeId = #{item.voucherTypeId},</if>
+                <if test="item.voucherId != null">voucherId = #{item.voucherId},</if>
+                <if test="item.enclosureId != null">enclosureId = #{item.enclosureId},</if>
+                <if test="item.code != null">code = #{item.code},</if>
+                <if test="item.orderNumber != null">orderNumber = #{item.orderNumber},</if>
+                <if test="item.updateTime != null">updateTime = #{item.updateTime},</if>
+            </set>
+            where orgId = #{item.orgId} 
+              and id = #{item.id}
+              and ts = #{item.ts}
+        </foreach>
+    </update>
+
+    <delete id="delete" parameterType="VoucherEnclosure">
+        delete from set_voucher_enclosure
+        where orgId = #{orgId} and id = #{id} and ts = #{ts}
+    </delete>
+
+    <delete id="deleteBatch" parameterType="java.util.List">
+        delete from set_voucher_enclosure
+        where
+        <foreach collection="list" item="item" separator=" or ">
+            (orgId = #{item.orgId} and id = #{item.id} and ts = #{item.ts})
+        </foreach>
+    </delete>
+
+    <delete id="deleteByVoucherId" parameterType="VoucherEnclosure">
+        delete from set_voucher_enclosure
+        where orgId = #{orgId} and voucherId = #{voucherId} and voucherTypeId = #{voucherTypeId}
+    </delete>
+
+    <delete id="deleteByVoucherIds" parameterType="java.util.List">
+        delete from set_voucher_enclosure
+        where
+        <foreach collection="list" item="item" separator=" or ">
+            (orgId = #{item.orgId} and voucherId = #{item.voucherId} and voucherTypeId = #{item.voucherTypeId})
+        </foreach>
+    </delete>
+
+    <select id="query" parameterType="VoucherEnclosure" resultType="VoucherEnclosureDto">
+        select *
+        from set_voucher_enclosure voucherEnclosure
+          inner join set_enclosure enclosure on enclosure.orgId = voucherEnclosure.orgId and enclosure.id = voucherEnclosure.enclosureId
+        <where>
+            voucherEnclosure.orgId = #{orgId}
+            <if test="voucherTypeId != null">and voucherEnclosure.voucherTypeId = #{voucherTypeId}</if>
+            <if test="voucherId != null">and voucherEnclosure.voucherId = #{voucherId}</if>
+            <if test="enclosureId != null">and voucherEnclosure.enclosureId = #{enclosureId}</if>
+            <if test="id != null">and voucherEnclosure.id = #{id}</if>
+            <if test="creator != null">and voucherEnclosure.creator = #{creator}</if>
+        </where>
+        order by voucherEnclosure.orderNumber asc
+    </select>
+
+    <select id="queryByIdList" parameterType="VoucherEnclosure" resultType="VoucherEnclosureDto">
+        <bind name="orgId" value="_parameter.get(&quot;list&quot;).get(0).getOrgId()"/>
+        select *
+        from set_voucher_enclosure voucherEnclosure
+          inner join set_enclosure enclosure on enclosure.orgId = voucherEnclosure.orgId and enclosure.id = voucherEnclosure.enclosureId
+        where voucherEnclosure.orgId = #{orgId}
+          and voucherEnclosure.id in 
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </select>
+</mapper>

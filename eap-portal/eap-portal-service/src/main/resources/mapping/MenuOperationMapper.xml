@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mk.eap.portal.dao.MenuOperationMapper">
+    <select id="findByUserId" parameterType="Map" resultType="com.mk.eap.portal.dto.MenuOperationDto">
+		SELECT d.id AS menuId,e.id AS operationId,e.name AS operationName
+		FROM eap_user a INNER JOIN eap_user_role b ON  a.id = b.userid 
+		INNER JOIN eap_menu_operation c ON b.roleid = c.roleid and c.roleid != '0'
+		INNER JOIN eap_menu d ON d.id = c.menuId 
+		INNER JOIN eap_operation e ON c.operationId = e.id
+		WHERE a.id = #{userId}; 
+  </select>
+  <select id="selectById" parameterType="Map" resultType="com.mk.eap.portal.dto.MenuOperationDto">
+		SELECT id,menuid,operationid,roleid FROM eap_menu_operation 
+		WHERE menuid = #{menuId} AND operationid = #{operationId} and roleid = '0';
+  </select> 
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mk.eap.component.enclosure.dao.SetEnclosureMapper">
+	<insert id="insert" parameterType="com.mk.eap.enclosure.vo.Enclosure">
+		INSERT INTO set_enclosure (
+		  id,
+		  orgId,
+		  elType,
+		  elSize,
+		  oldName,
+		  newName,
+		  elSuffix,
+		  creator
+		) 
+		VALUES
+	    (
+		  #{id},
+		  #{orgId},
+		  #{elType},
+		  #{elSize},
+		  #{oldName},
+		  #{newName},
+		  #{elSuffix},
+		  #{creator}
+		 ) ;											
+	</insert>
+	
+	<select id="findSetEnclosureById" parameterType="com.mk.eap.enclosure.vo.Enclosure" resultType="com.mk.eap.enclosure.vo.Enclosure">
+		select * from set_enclosure
+		<where>
+			orgId = #{orgId}
+			<if test=" id != null ">
+				and id = #{id}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findSetEnclosure" parameterType="com.mk.eap.enclosure.vo.Enclosure" resultType="com.mk.eap.enclosure.vo.Enclosure">
+		select * from set_enclosure
+		<where>
+			orgId = #{orgId}
+			<if test=" id != null ">
+				and id = #{id}
+			</if>
+		</where>
+	</select>
+</mapper>
